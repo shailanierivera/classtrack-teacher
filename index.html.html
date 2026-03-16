@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Teacher Dashboard — Attendance & Recitation</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0d1117;--s1:#161b27;--s2:#1e2535;--s3:#252d40;
+  --border:#2d3650;--border2:#3a4560;
+  --accent:#6366f1;--accent-l:#818cf8;
+  --green:#22c55e;--green-l:#4ade80;--green-bg:#052e16;
+  --red:#ef4444;--red-l:#f87171;--red-bg:#2d0a0a;
+  --yellow:#f59e0b;--yellow-l:#fbbf24;--yellow-bg:#2d1e00;
+  --blue:#3b82f6;--blue-l:#60a5fa;--blue-bg:#0c1a3a;
+  --purple:#a855f7;--purple-l:#c084fc;--purple-bg:#1e0a35;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
+  --mono:'DM Mono',monospace;--font:'Plus Jakarta Sans',sans-serif;
+  --r:10px;--r2:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap;}
+.logo{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.conn-pill{display:flex;align-items:center;gap:5px;font-size:11px;background:var(--s2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;color:var(--muted2);}
+.conn-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);}
+.conn-pill .dot.ok{background:var(--green);}
+.conn-pill .dot.err{background:var(--red);}
+
+.main{max-width:1040px;margin:0 auto;padding:1.25rem 1rem 3rem;}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.card-title{font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+
+/* FIELDS */
+.field{margin-bottom:10px;}
+.field label{font-size:12px;color:var(--muted2);display:block;margin-bottom:5px;font-weight:500;}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;font-family:var(--font);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
+.field .hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+
+/* BUTTONS */
+.btn{padding:10px 18px;font-size:13px;font-weight:600;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--font);transition:opacity .15s,transform .1s;display:inline-flex;align-items:center;gap:6px;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{opacity:.88;}
+.btn-green{background:var(--green);color:#052e16;}
+.btn-green:hover{opacity:.88;}
+.btn-red{background:var(--red);color:#fff;}
+.btn-red:hover{opacity:.88;}
+.btn-outline{background:transparent;border:1px solid var(--border2);color:var(--muted2);}
+.btn-outline:hover{border-color:var(--text);color:var(--text);}
+.btn-block{width:100%;justify-content:center;}
+.btn-sm{padding:6px 14px;font-size:12px;}
+
+/* GRADE RANGES */
+.grade-table{width:100%;border-collapse:collapse;margin-top:6px;}
+.grade-table th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.grade-table td{padding:6px 8px;border-bottom:1px solid var(--border);}
+.grade-table td input{padding:5px 8px;font-size:12px;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);width:100%;font-family:var(--font);}
+.grade-table td input:focus{outline:none;border-color:var(--accent);}
+.grade-table tr:last-child td{border-bottom:none;}
+.add-grade-btn{font-size:12px;color:var(--accent-l);background:none;border:1px dashed var(--border2);border-radius:6px;padding:5px 12px;cursor:pointer;margin-top:6px;font-family:var(--font);}
+.add-grade-btn:hover{border-color:var(--accent);color:var(--accent);}
+.del-row-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px;}
+
+/* SUBJECTS */
+.subject-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.subject-tag{display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text);}
+.subject-tag button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;}
+.subject-tag button:hover{color:var(--red);}
+.subject-add-row{display:flex;gap:6px;}
+.subject-add-row input{flex:1;padding:7px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:13px;font-family:var(--font);}
+.subject-add-row input:focus{outline:none;border-color:var(--accent);}
+
+/* SESSION PANEL */
+.session-panel{background:var(--s2);border:1px solid var(--border2);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1rem;}
+.session-info{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.live-badge{display:flex;align-items:center;gap:5px;background:#052e16;border:1px solid var(--green);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:600;color:var(--green-l);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.session-meta{font-size:13px;color:var(--muted2);}
+.session-meta strong{color:var(--text);}
+.session-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:1rem;}
+.stat{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;}
+.stat-val{font-size:24px;font-weight:700;font-family:var(--mono);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.06em;}
+.stat-val.green{color:var(--green-l);}
+.stat-val.blue{color:var(--blue-l);}
+.stat-val.purple{color:var(--purple-l);}
+.stat-val.yellow{color:var(--yellow-l);}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;align-items:center;}
+.filter-bar input,.filter-bar select{padding:7px 12px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:12px;font-family:var(--font);}
+.filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:var(--accent);}
+.filter-bar input{flex:1;min-width:160px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;gap:8px;flex-wrap:wrap;}
+.section-head h2{font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em;}
+
+/* TABLE */
+.tbl-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);overflow:auto;}
+table{width:100%;border-collapse:collapse;min-width:560px;}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);background:var(--s2);white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border);}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--s2);}
+tbody td{padding:9px 12px;font-size:12px;color:var(--text);vertical-align:middle;}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;font-family:var(--mono);}
+.pill-green{background:#052e1640;color:var(--green-l);border:1px solid var(--green);}
+.pill-red{background:#2d0a0a40;color:var(--red-l);border:1px solid var(--red);}
+.pill-blue{background:#0c1a3a40;color:var(--blue-l);border:1px solid var(--blue);}
+.pill-purple{background:#1e0a3540;color:var(--purple-l);border:1px solid var(--purple);}
+.pill-yellow{background:#2d1e0040;color:var(--yellow-l);border:1px solid var(--yellow);}
+.pill-gray{background:var(--s2);color:var(--muted2);border:1px solid var(--border);}
+.mono{font-family:var(--mono);font-size:12px;}
+.empty{padding:2.5rem;text-align:center;color:var(--muted);font-size:13px;}
+.empty .ico{font-size:28px;margin-bottom:8px;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:1rem;background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:4px;}
+.tab{flex:1;padding:7px;font-size:12px;font-weight:600;border-radius:7px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font);text-align:center;}
+.tab.active{background:var(--accent);color:#fff;}
+
+/* CONN SETUP */
+.conn-wrap{max-width:520px;margin:2rem auto;}
+.conn-title{font-size:22px;font-weight:700;margin-bottom:4px;}
+.conn-sub{font-size:13px;color:var(--muted2);margin-bottom:1.5rem;line-height:1.6;}
+.code-block{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--muted2);white-space:pre-wrap;margin:8px 0;line-height:1.6;}
+.steps ol{margin-left:1.25rem;color:var(--muted2);font-size:13px;line-height:2;}
+.steps ol li strong{color:var(--text);}
+.steps a{color:var(--accent-l);}
+
+@media(max-width:600px){
+  .row2,.row3{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .main{padding:1rem .75rem 3rem;}
+  .card{padding:1rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><div class="logo-dot"></div>ClassTrack <span style="font-weight:400;color:var(--muted2);font-size:13px;">Teacher</span></div>
+  <div class="topbar-right">
+    <div class="conn-pill"><div class="dot" id="cDot"></div><span id="cLabel">Not connected</span></div>
+  </div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+let CFG={url:'',key:'',table:'class_records'};
+let APP={
+  phase:'conn',
+  subjects:[],
+  gradeRanges:[
+    {min:0,max:0,label:'No recitation',grade:'—',color:'gray'},
+    {min:1,max:2,label:'Needs Improvement',grade:'NI',color:'red'},
+    {min:3,max:5,label:'Satisfactory',grade:'S',color:'yellow'},
+    {min:6,max:9,label:'Good',grade:'G',color:'blue'},
+    {min:10,max:999,label:'Outstanding',grade:'O',color:'green'}
+  ],
+  ptsPerRecitation:1,
+  session:null,
+  tab:'live'
+};
+let records=[];
+let pollTimer=null;
+let _search='',_subjectFilter='all',_dateFilter='';
+
+function saveCFG(){try{localStorage.setItem('ct_cfg',JSON.stringify(CFG));}catch(e){}}
+function loadCFG(){try{const d=localStorage.getItem('ct_cfg');if(d)CFG={...CFG,...JSON.parse(d)};}catch(e){}}
+function saveAPP(){try{localStorage.setItem('ct_app',JSON.stringify(APP));}catch(e){}}
+function loadAPP(){try{const d=localStorage.getItem('ct_app');if(d){const p=JSON.parse(d);APP={...APP,...p};}}catch(e){}}
+
+loadCFG();loadAPP();
+if(!APP.subjects)APP.subjects=[];
+if(!APP.gradeRanges||APP.gradeRanges.length===0)APP.gradeRanges=[
+  {min:0,max:0,label:'No recitation',grade:'—',color:'gray'},
+  {min:1,max:2,label:'Needs Improvement',grade:'NI',color:'red'},
+  {min:3,max:5,label:'Satisfactory',grade:'S',color:'yellow'},
+  {min:6,max:9,label:'Good',grade:'G',color:'blue'},
+  {min:10,max:999,label:'Outstanding',grade:'O',color:'green'}
+];
+
+async function sb(method,path,body){
+  const r=await fetch(CFG.url+'/rest/v1/'+path,{
+    method,headers:{'apikey':CFG.key,'Authorization':'Bearer '+CFG.key,'Content-Type':'application/json','Prefer':'return=representation'},
+    body:body?JSON.stringify(body):undefined
+  });
+  if(!r.ok){const t=await r.text();throw new Error(t);}
+  return r.status===204?[]:r.json();
+}
+
+async function testConn(){
+  try{await sb('GET',CFG.table+'?limit=1');setConn(true);return true;}
+  catch(e){setConn(false);return false;}
+}
+function setConn(ok){
+  document.getElementById('cDot').className='dot'+(ok?' ok':' err');
+  document.getElementById('cLabel').textContent=ok?'Connected':'Not connected';
+}
+
+function getGrade(pts){
+  for(const r of APP.gradeRanges){
+    if(pts>=r.min&&pts<=r.max) return r;
+  }
+  return {label:'—',grade:'—',color:'gray'};
+}
+
+function pillClass(color){
+  return 'pill pill-'+color;
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function render(){
+  const m=document.getElementById('main');
+  m.innerHTML='';
+  if(!CFG.url||!CFG.key){renderConn(m);return;}
+  if(APP.phase==='setup'){renderSetup(m);return;}
+  renderDash(m);
+}
+
+// ── CONN SETUP ──────────────────────────────────────────────────────────────
+function renderConn(m){
+  m.innerHTML=`
+  <div class="conn-wrap">
+    <div class="conn-title">Connect Database</div>
+    <div class="conn-sub">Paste your Supabase credentials below. First time? Run this SQL in your Supabase project's SQL Editor:</div>
+    <div class="code-block">CREATE TABLE class_records (
+  id bigserial primary key,
+  session_id text,
+  subject text,
+  student_name text,
+  status text,
+  recitations int default 0,
+  points int default 0,
+  grade_label text,
+  grade_code text,
+  recorded_at timestamptz default now(),
+  date text
+);
+ALTER TABLE class_records ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "open" ON class_records FOR ALL USING (true) WITH CHECK (true);</div>
+    <div class="card">
+      <div class="card-title">Supabase credentials</div>
+      <div class="field"><label>Project URL</label><input id="sbU" placeholder="https://xxxx.supabase.co" value="${CFG.url}"/></div>
+      <div class="field"><label>Publishable / Anon Key</label><input id="sbK" placeholder="sb_publishable_..." value="${CFG.key}"/></div>
+      <button class="btn btn-primary btn-block" onclick="doConn()" style="margin-top:6px;">Connect & Continue →</button>
+    </div>
+  </div>`;
+}
+async function doConn(){
+  CFG.url=document.getElementById('sbU').value.trim().replace(/\/$/,'');
+  CFG.key=document.getElementById('sbK').value.trim();
+  saveCFG();
+  const ok=await testConn();
+  if(ok){APP.phase=APP.subjects.length?'session':'setup';saveAPP();render();}
+  else alert('Could not connect. Check your URL and key, and make sure you ran the SQL.');
+}
+
+// ── APP SETUP ───────────────────────────────────────────────────────────────
+function renderSetup(m){
+  const subjectTags=APP.subjects.map((s,i)=>`<div class="subject-tag">${s}<button onclick="removeSub(${i})">×</button></div>`).join('');
+  let gradeRows=APP.gradeRanges.map((r,i)=>`
+    <tr>
+      <td><input type="number" value="${r.min}" onchange="updateRange(${i},'min',this.value)" style="width:60px;"/></td>
+      <td><input type="number" value="${r.max=== 999?'∞':r.max}" onchange="updateRange(${i},'max',this.value)" style="width:60px;" placeholder="∞"/></td>
+      <td><input type="text" value="${r.label}" onchange="updateRange(${i},'label',this.value)"/></td>
+      <td><input type="text" value="${r.grade}" onchange="updateRange(${i},'grade',this.value)" style="width:50px;"/></td>
+      <td>
+        <select onchange="updateRange(${i},'color',this.value)">
+          ${['green','blue','yellow','red','purple','gray'].map(c=>`<option value="${c}"${r.color===c?' selected':''}>${c}</option>`).join('')}
+        </select>
+      </td>
+      <td><button class="del-row-btn" onclick="delRange(${i})">✕</button></td>
+    </tr>`).join('');
+
+  m.innerHTML=`
+  <div style="max-width:680px;margin:0 auto;">
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:20px;font-weight:700;margin-bottom:4px;">App Setup</div>
+      <div style="font-size:13px;color:var(--muted2);">Configure subjects and grading — only needed once.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Your subjects</div>
+      <div class="subject-list" id="subList">${subjectTags||'<span style="font-size:12px;color:var(--muted)">No subjects yet</span>'}</div>
+      <div class="subject-add-row">
+        <input id="newSub" placeholder="Add a subject (e.g. Mathematics)" onkeydown="if(event.key==='Enter')addSub()"/>
+        <button class="btn btn-primary btn-sm" onclick="addSub()">Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recitation grading</div>
+      <div class="field">
+        <label>Points per recitation</label>
+        <input type="number" id="ptsInput" value="${APP.ptsPerRecitation}" min="1" style="width:80px;"/>
+        <div class="hint">Each time a student taps "I Recited", they earn this many points.</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:8px;margin-top:4px;">Grade ranges (based on total points)</div>
+      <div style="overflow-x:auto;">
+        <table class="grade-table">
+          <thead><tr><th>Min pts</th><th>Max pts</th><th>Label</th><th>Grade</th><th>Color</th><th></th></tr></thead>
+          <tbody id="gradeBody">${gradeRows}</tbody>
+        </table>
+      </div>
+      <button class="add-grade-btn" onclick="addRange()">+ Add range</button>
+    </div>
+    <button class="btn btn-green btn-block" onclick="saveSetup()">Save & Open Sessions ▶</button>
+  </div>`;
+}
+
+function addSub(){
+  const v=document.getElementById('newSub').value.trim();
+  if(!v)return;
+  if(APP.subjects.includes(v)){alert('Subject already added.');return;}
+  APP.subjects.push(v);saveAPP();renderSetup(document.getElementById('main'));
+  setTimeout(()=>document.getElementById('newSub').focus(),50);
+}
+function removeSub(i){APP.subjects.splice(i,1);saveAPP();renderSetup(document.getElementById('main'));}
+function updateRange(i,k,v){
+  if(k==='min'||k==='max') v=v===''||v==='∞'?999:parseInt(v)||0;
+  APP.gradeRanges[i][k]=v;saveAPP();
+}
+function delRange(i){APP.gradeRanges.splice(i,1);saveAPP();renderSetup(document.getElementById('main'));}
+function addRange(){
+  APP.gradeRanges.push({min:0,max:0,label:'New range',grade:'—',color:'gray'});
+  saveAPP();renderSetup(document.getElementById('main'));
+}
+function saveSetup(){
+  APP.ptsPerRecitation=parseInt(document.getElementById('ptsInput').value)||1;
+  if(APP.subjects.length===0){alert('Please add at least one subject.');return;}
+  APP.phase='session';saveAPP();render();
+}
+
+// ── SESSION OPEN ─────────────────────────────────────────────────────────────
+function renderDash(m){
+  if(!APP.session){renderOpenSession(m);return;}
+  renderLiveDash(m);
+}
+
+function renderOpenSession(m){
+  const today=new Date().toISOString().split('T')[0];
+  const subOpts=APP.subjects.map(s=>`<option value="${s}">${s}</option>`).join('');
+  m.innerHTML=`
+  <div style="max-width:520px;margin:1.5rem auto;">
+    <div style="font-size:20px;font-weight:700;margin-bottom:4px;">Open a Session</div>
+    <div style="font-size:13px;color:var(--muted2);margin-bottom:1.25rem;">Students will be able to mark attendance and recitation once you open.</div>
+    <div class="card">
+      <div class="card-title">Session details</div>
+      <div class="row2">
+        <div class="field"><label>Subject</label><select id="sessSub">${subOpts}</select></div>
+        <div class="field"><label>Date</label><input type="date" id="sessDate" value="${today}"/></div>
+      </div>
+      <div class="field"><label>Session label (optional)</label><input id="sessLabel" placeholder="e.g. Midterm Week, Unit 3 Review"/></div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="openSession()">▶ Open Session for Students</button>
+    <div style="margin-top:10px;">
+      <button class="btn btn-outline btn-block btn-sm" onclick="APP.phase='setup';saveAPP();render()">⚙ Edit subjects / grading</button>
+    </div>
+  </div>`;
+}
+
+async function openSession(){
+  const sub=document.getElementById('sessSub').value;
+  const date=document.getElementById('sessDate').value;
+  const label=document.getElementById('sessLabel').value.trim();
+  const sessId='sess_'+Date.now();
+  APP.session={id:sessId,subject:sub,date:date,label:label,open:true};
+  // Push session marker
+  await sb('POST',CFG.table,{
+    session_id:sessId,subject:sub,student_name:'__SESSION__',
+    status:'open',recitations:APP.ptsPerRecitation,points:-1,
+    grade_label:JSON.stringify(APP.gradeRanges),grade_code:JSON.stringify(APP.subjects),
+    date:date
+  });
+  saveAPP();records=[];startPoll();render();
+}
+
+// ── LIVE DASHBOARD ────────────────────────────────────────────────────────────
+function renderLiveDash(m){
+  const sess=APP.session;
+  const present=records.filter(r=>r.status==='present'||r.status==='recited').length;
+  const recited=records.filter(r=>r.recitations>0).length;
+  const totalRec=records.reduce((a,b)=>a+(b.recitations||0),0);
+  const avgPts=records.length?Math.round(records.reduce((a,b)=>a+(b.points||0),0)/records.length*10)/10:0;
+
+  const search=_search.toLowerCase();
+  let filtered=[...records];
+  if(search) filtered=filtered.filter(r=>r.student_name.toLowerCase().includes(search));
+
+  let rows='';
+  if(filtered.length===0){
+    rows=`<tr><td colspan="7"><div class="empty"><div class="ico">👀</div>Waiting for students to join…</div></td></tr>`;
+  } else {
+    filtered.sort((a,b)=>(b.points||0)-(a.points||0)).forEach((r,i)=>{
+      const g=getGrade(r.points||0);
+      const time=r.recorded_at?new Date(r.recorded_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+      rows+=`<tr>
+        <td class="mono" style="color:var(--muted)">${i+1}</td>
+        <td style="font-weight:500;">${r.student_name}</td>
+        <td><span class="pill ${r.status==='present'||r.status==='recited'?'pill-green':'pill-red'}">${r.status==='present'||r.status==='recited'?'Present':'—'}</span></td>
+        <td class="mono">${r.recitations||0}</td>
+        <td class="mono">${r.points||0} pts</td>
+        <td><span class="pill pill-${g.color}">${g.grade}</span></td>
+        <td style="font-size:11px;color:var(--muted)">${time}</td>
+      </tr>`;
+    });
+  }
+
+  m.innerHTML=`
+    <div class="session-panel">
+      <div class="session-info">
+        ${sess.open?`<div class="live-badge"><div class="live-dot"></div>LIVE</div>`:`<div class="pill pill-gray">Closed</div>`}
+        <div class="session-meta"><strong>${sess.subject}</strong> &nbsp;·&nbsp; ${sess.date} ${sess.label?'&nbsp;·&nbsp; '+sess.label:''}</div>
+      </div>
+      <div class="session-actions">
+        ${sess.open?`<button class="btn btn-red btn-sm" onclick="closeSession()">⏹ Close Session</button>`:''}
+        <button class="btn btn-primary btn-sm" onclick="APP.session=null;saveAPP();stopPoll();render()">＋ New Session</button>
+        <button class="btn btn-outline btn-sm" onclick="APP.phase='setup';APP.session=null;saveAPP();stopPoll();render()">⚙ Settings</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val blue">${records.length}</div><div class="stat-lbl">Total students</div></div>
+      <div class="stat"><div class="stat-val green">${present}</div><div class="stat-lbl">Present</div></div>
+      <div class="stat"><div class="stat-val purple">${recited}</div><div class="stat-lbl">Recited</div></div>
+      <div class="stat"><div class="stat-val yellow">${totalRec}</div><div class="stat-lbl">Total recitations</div></div>
+      <div class="stat"><div class="stat-val">${avgPts}</div><div class="stat-lbl">Avg points</div></div>
+    </div>
+
+    <div class="section-head">
+      <h2>Student records</h2>
+    </div>
+    <div class="filter-bar">
+      <input placeholder="Search student…" value="${_search}" oninput="_search=this.value;renderLiveDash(document.getElementById('main'))"/>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Student name</th><th>Attendance</th><th>Recitations</th><th>Points</th><th>Grade</th><th>Time</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:1.25rem;">
+      <div class="section-head"><h2>All past records</h2></div>
+      <div class="filter-bar">
+        <input placeholder="Search name…" id="histSearch" value="" oninput="loadHistory()"/>
+        <select id="histSub" onchange="loadHistory()">
+          <option value="all">All subjects</option>
+          ${APP.subjects.map(s=>`<option value="${s}">${s}</option>`).join('')}
+        </select>
+        <input type="date" id="histDate" onchange="loadHistory()"/>
+      </div>
+      <div id="histTable"><div class="tbl-wrap"><div class="empty">Loading…</div></div></div>
+    </div>
+  `;
+  loadHistory();
+}
+
+async function loadHistory(){
+  const search=(document.getElementById('histSearch')?.value||'').toLowerCase();
+  const sub=document.getElementById('histSub')?.value||'all';
+  const date=document.getElementById('histDate')?.value||'';
+  let query=CFG.table+'?student_name=neq.__SESSION__&order=recorded_at.desc&limit=200';
+  if(sub!=='all') query+=`&subject=eq.${encodeURIComponent(sub)}`;
+  if(date) query+=`&date=eq.${date}`;
+  try{
+    let rows=await sb('GET',query);
+    if(search) rows=rows.filter(r=>r.student_name.toLowerCase().includes(search));
+    let html='';
+    if(rows.length===0){html=`<div class="empty"><div class="ico">📭</div>No records found</div>`;}
+    else{
+      let trs=rows.map((r,i)=>{
+        const g=getGrade(r.points||0);
+        const dt=r.recorded_at?new Date(r.recorded_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+        return `<tr>
+          <td class="mono" style="color:var(--muted)">${i+1}</td>
+          <td style="font-weight:500;">${r.student_name}</td>
+          <td style="font-size:11px;color:var(--muted2)">${r.subject||'—'}</td>
+          <td style="font-size:11px;color:var(--muted2)">${r.date||'—'}</td>
+          <td><span class="pill ${r.status==='present'||r.status==='recited'?'pill-green':'pill-red'}">${r.status==='present'||r.status==='recited'?'Present':'Absent'}</span></td>
+          <td class="mono">${r.recitations||0}</td>
+          <td class="mono">${r.points||0} pts</td>
+          <td><span class="pill pill-${g.color}">${g.grade}</span></td>
+          <td style="font-size:11px;color:var(--muted)">${dt}</td>
+        </tr>`;
+      }).join('');
+      html=`<table style="min-width:700px;"><thead><tr><th>#</th><th>Name</th><th>Subject</th><th>Date</th><th>Attendance</th><th>Recitations</th><th>Points</th><th>Grade</th><th>Time</th></tr></thead><tbody>${trs}</tbody></table>`;
+    }
+    document.getElementById('histTable').innerHTML=`<div class="tbl-wrap" style="overflow:auto;">${html}</div>`;
+  }catch(e){document.getElementById('histTable').innerHTML=`<div class="tbl-wrap"><div class="empty">Error loading: ${e.message}</div></div>`;}
+}
+
+async function closeSession(){
+  if(!confirm('Close this session? Students can no longer tap in.'))return;
+  APP.session.open=false;saveAPP();
+  await sb('PATCH',CFG.table+'?session_id=eq.'+APP.session.id+'&student_name=eq.__SESSION__',{status:'closed'});
+  stopPoll();render();
+}
+
+async function fetchRecords(){
+  if(!APP.session)return;
+  try{
+    const rows=await sb('GET',CFG.table+'?session_id=eq.'+APP.session.id+'&student_name=neq.__SESSION__&order=recorded_at.asc');
+    records=rows;
+    renderLiveDash(document.getElementById('main'));
+  }catch(e){}
+}
+
+function startPoll(){pollTimer=setInterval(fetchRecords,3000);fetchRecords();}
+function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
+
+// Init
+(async()=>{
+  if(CFG.url&&CFG.key){
+    const ok=await testConn();
+    if(ok&&APP.phase==='session'&&APP.session){startPoll();}
+  }
+  render();
+})();
+</script>
+</body>
+</html>
